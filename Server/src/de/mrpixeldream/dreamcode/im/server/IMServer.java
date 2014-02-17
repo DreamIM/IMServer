@@ -20,6 +20,7 @@ import de.mrpixeldream.dreamcode.im.server.commands.CommandLogin;
 import de.mrpixeldream.dreamcode.im.server.commands.CommandSend;
 import de.mrpixeldream.dreamcode.im.server.commands.CommandShow;
 import de.mrpixeldream.dreamcode.im.server.db.DBManager;
+import de.mrpixeldream.dreamcode.im.server.io.EncryptionUtility;
 
 public class IMServer {
 	
@@ -42,6 +43,7 @@ public class IMServer {
     HashMap<String, String> names;
     HashMap<InetAddress, String> ips;
     HashMap<String, String> ids;
+    HashMap<String, String> passwords;
     
     ArrayList<ClientHandler> clientHandlers;
     
@@ -53,6 +55,8 @@ public class IMServer {
     boolean isRunning = true;
 
 	public static void main(String[] args) {
+		
+		System.out.println("Hallo");
 		
 		int port = 22558;
 		
@@ -68,7 +72,10 @@ public class IMServer {
 			}
 		}
 		
+		System.out.println("Constructor now");
+		
 		IMServer server = new IMServer(port);
+		System.out.println("Start");
 		server.startServer();
 
 	}
@@ -76,6 +83,7 @@ public class IMServer {
 	public IMServer(int port)
 	{
 		this.port = port;
+		return;
 	}
 	
 	public void startServer()
@@ -100,6 +108,7 @@ public class IMServer {
             names = new HashMap<String, String>();
             ips = new HashMap<InetAddress, String>();
             ids = new HashMap<String, String>();
+            passwords = new HashMap<>();
             
             clientHandlers = new ArrayList<>();
             
@@ -169,7 +178,7 @@ public class IMServer {
 		}
 	}
 	
-	public String doLogin(Socket client, String name, String password)
+	public String doLogin(Socket client, String name, String password, ClientHandler handler)
     {
             String id;
             
@@ -186,7 +195,9 @@ public class IMServer {
                     names.put(id, name);
                     ips.put(client.getInetAddress(), id);
                     ids.put(name, id);
+                    passwords.put(id, password);
                     dbManager.setOnlineStatus(name, true);
+                    handler.setEncryptionUtility(new EncryptionUtility(password));
                     log("Logged in from " + client.getInetAddress() + " with ID " + id, LogLevel.INFO);
                     return "Successfully logged in! Got ID: " + id;
             	}

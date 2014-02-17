@@ -17,7 +17,7 @@ public class CommandLogin implements Command {
 			{
 				PrintWriter output = new PrintWriter(sender.getOutputStream());
 				
-				String statusMessage = handler.parent.doLogin(sender, command.split(" ")[1], command.split(" ")[2]);
+				String statusMessage = handler.parent.doLogin(sender, command.split(" ")[1], command.split(" ")[2], clientHandler);
 				
 				if (!statusMessage.toUpperCase().contains("MATCH"))
 				{

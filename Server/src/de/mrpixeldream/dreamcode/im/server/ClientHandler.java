@@ -5,12 +5,16 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Scanner;
 
+import de.mrpixeldream.dreamcode.im.server.io.EncryptionUtility;
+
 public class ClientHandler extends Thread {
 
 	Socket client;
     String id;
     Scanner input;
     PrintWriter output;
+    
+    EncryptionUtility encryptionUtil;
     
     IMServer parent;
     
@@ -31,6 +35,11 @@ public class ClientHandler extends Thread {
         {
                 e.printStackTrace();
         }
+    }
+    
+    public void setEncryptionUtility(EncryptionUtility encUtil)
+    {
+    	this.encryptionUtil = encUtil;
     }
     
     @Override

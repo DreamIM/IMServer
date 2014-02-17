@@ -11,7 +11,7 @@ import de.mrpixeldream.dreamcode.im.server.LogLevel;
 public class DBManager {
 	
 	// The connection driver for the database
-	SQLConnect dbDriver = new SQLConnect("127.0.0.1", "root", "", "code_im", 3306);
+	SQLConnect dbDriver = new SQLConnect("db4free.net", "dreamcode", "Gummiball13", "dreamcode", 3306);
 	
 	IMServer parent;
 	
