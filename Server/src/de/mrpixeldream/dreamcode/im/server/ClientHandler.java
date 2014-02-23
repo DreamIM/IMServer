@@ -50,8 +50,9 @@ public class ClientHandler extends Thread {
     		
     		try
             {
-                msg = encryptionUtil.receiveEncrypted(client); 
-                System.out.println(msg);
+                //msg = encryptionUtil.receiveEncrypted(client); 
+                //System.out.println(msg);
+    			msg = input.nextLine();
                 this.parent.getCommandHandler().handleCommand(msg, client, this);
             }
             catch (Exception e)

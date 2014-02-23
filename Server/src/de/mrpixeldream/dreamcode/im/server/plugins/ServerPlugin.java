@@ -1,7 +1,10 @@
 package de.mrpixeldream.dreamcode.im.server.plugins;
 
-public interface ServerPlugin {
+import de.mrpixeldream.dreamcode.im.server.commands.Command;
 
-	public String getMsg();
+public interface ServerPlugin extends Command {
+
+	public void onLoad();
+	public void onUnload();
 	
 }

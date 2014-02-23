@@ -21,6 +21,14 @@ public class PluginManager
 		this.parent = parent;
 	}
 
+	public void unloadPlugins(ArrayList<ServerPlugin> plugins)
+	{
+		for (ServerPlugin plugin : plugins)
+		{
+			plugin.onUnload();
+		}
+	}
+	
 	public ArrayList<ServerPlugin> loadPlugins()
 	{
 		ArrayList<ServerPlugin> plugins = new ArrayList<>();
@@ -49,6 +57,9 @@ public class PluginManager
 				final String pluginClassName = props.getString("dreamcode.serverplugin.Name");
 
 				ServerPlugin plugin = (ServerPlugin) loader.loadClass(pluginClassName).newInstance();
+				
+				plugin.onLoad();
+				
 				plugins.add(plugin);
 
 			}

@@ -30,7 +30,7 @@ public class IMServer
 
 	FileWriter						logger;
 
-	// Commands
+	// Default Commands
 	CommandShow						cmdShow			= new CommandShow();
 	CommandSend						cmdSend			= new CommandSend();
 	CommandBroadcast				cmdBroadcast	= new CommandBroadcast();
@@ -129,6 +129,11 @@ public class IMServer
 				log("Loading custom features...", LogLevel.INFO);
 
 				this.plugins = this.pluginManager.loadPlugins();
+				
+				for (ServerPlugin plugin : this.plugins)
+				{
+					this.cmdHandler.addCommand(plugin);
+				}
 
 				server = new ServerSocket(port);
 
@@ -201,6 +206,7 @@ public class IMServer
 				clientHandlers.put(id, handler);
 				dbManager.setOnlineStatus(name, true);
 				handler.setEncryptionUtility(new EncryptionUtility(password));
+				handler.setID(id);
 				handler.start();
 				log("Logged in from " + client.getInetAddress() + " with ID " + id, LogLevel.INFO);
 				return "succ_login " + id;
@@ -307,14 +313,16 @@ public class IMServer
 	public void sendMessage(String id, String message)
 	{
 		ClientHandler handler = clientHandlers.get(id);
-		handler.getEncryptionUtility().sendEncrypted(message, clients.get(id));
+		handler.output.println(message);
+		handler.output.flush();
 	}
 
 	public void broadcastMessage(String message)
 	{
 		for (ClientHandler handler : clientHandlers.values())
 		{
-			handler.getEncryptionUtility().sendEncrypted(message, handler.client);
+			handler.output.println(message);
+			handler.output.flush();
 		}
 	}
 
