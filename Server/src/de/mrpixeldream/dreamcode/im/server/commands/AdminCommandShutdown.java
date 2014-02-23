@@ -1,11 +1,8 @@
 package de.mrpixeldream.dreamcode.im.server.commands;
 
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.net.Socket;
 
 import de.mrpixeldream.dreamcode.im.server.ClientHandler;
-import de.mrpixeldream.dreamcode.im.server.LogLevel;
 
 public class AdminCommandShutdown implements Command {
 
@@ -25,17 +22,7 @@ public class AdminCommandShutdown implements Command {
 			}
 			else
 			{
-				try
-				{
-					PrintWriter output = new PrintWriter(sender.getOutputStream());
-					output.println("You are not an administrator!");
-					output.flush();
-				}
-				catch (IOException e)
-				{
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				clientHandler.getEncryptionUtility().sendEncrypted("You are not an administrator!", sender);
 			}
 			
 			return true;

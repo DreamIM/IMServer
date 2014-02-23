@@ -27,9 +27,6 @@ public class ClientHandler extends Thread {
         {
                 this.input = new Scanner(client.getInputStream());
                 this.output = new PrintWriter(client.getOutputStream());
-                
-                this.output.println("ACK");
-                this.output.flush();
         }
         catch (IOException e)
         {
@@ -53,7 +50,8 @@ public class ClientHandler extends Thread {
     		
     		try
             {
-                msg = this.input.nextLine();      
+                msg = encryptionUtil.receiveEncrypted(client); 
+                System.out.println(msg);
                 this.parent.getCommandHandler().handleCommand(msg, client, this);
             }
             catch (Exception e)
@@ -75,6 +73,11 @@ public class ClientHandler extends Thread {
     public String getID()
     {
     	return this.id;
+    }
+    
+    public EncryptionUtility getEncryptionUtility()
+    {
+    	return this.encryptionUtil;
     }
     
     public void logout()

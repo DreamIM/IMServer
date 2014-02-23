@@ -1,7 +1,5 @@
 package de.mrpixeldream.dreamcode.im.server.db;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -29,15 +27,8 @@ public class DBManager {
 		try
 		{
 			result.next();
-			MessageDigest sha1 = MessageDigest.getInstance("SHA-1");
-			byte[] hash = sha1.digest(password.getBytes());
 			
-			return byteArrayToHexString(hash).equals(result.getString("password"));
-		}
-		catch (NoSuchAlgorithmException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			return password.equals(result.getString("password"));
 		}
 		catch (SQLException e)
 		{
@@ -79,7 +70,8 @@ public class DBManager {
 		try
 		{
 			result.next();
-			return result.getBoolean("online");
+			boolean onlineStatus = result.getBoolean("online");
+			return onlineStatus;
 		}
 		catch (SQLException e)
 		{
@@ -123,18 +115,6 @@ public class DBManager {
 		 }
 		 return data;
 	 }
-	 
-	 private String byteArrayToHexString(byte[] b)
-	 {
-		  String result = "";
-		  
-		  for (int i=0; i < b.length; i++)
-		  {
-			  result += Integer.toString( ( b[i] & 0xff ) + 0x100, 16).substring( 1 );
-		  }
-		  
-		  return result;
-	}
 
 	 public void shutdown()
 	 {

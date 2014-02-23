@@ -31,11 +31,12 @@ public class ReadWriteAES
 		SecretKey secret = new SecretKeySpec(tmp.getEncoded(), "AES");
     
 		Key k = new SecretKeySpec( secret.getEncoded(), "AES" );
-		System.out.println(new String(k.getEncoded()));
+		//System.out.println(new String(k.getEncoded()));
 		c.init( Cipher.ENCRYPT_MODE, k );
 
 		OutputStream cos = new CipherOutputStream( out, c );
 		cos.write( bytes );
+		cos.flush();
 		cos.close();
 	}
 
@@ -49,7 +50,7 @@ public class ReadWriteAES
     	SecretKey secret = new SecretKeySpec(tmp.getEncoded(), "AES");
     
     	Key k = new SecretKeySpec( secret.getEncoded(), "AES" );
-    	System.out.println(new String(k.getEncoded()));
+    	//System.out.println(new String(k.getEncoded()));
     	c.init( Cipher.DECRYPT_MODE, k );
 
     	ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -60,6 +61,10 @@ public class ReadWriteAES
     		bos.write( b );
     	}
 
+    	System.out.println("miau");
+    	
+    	bos.flush();
+    	bos.close();
     	cis.close();
     	return bos.toByteArray();
   	}
