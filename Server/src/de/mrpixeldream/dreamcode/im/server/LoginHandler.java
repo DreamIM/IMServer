@@ -1,11 +1,10 @@
 package de.mrpixeldream.dreamcode.im.server;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
+
+import de.mrpixeldream.dreamcode.im.server.io.MessageWrapper;
 
 public class LoginHandler extends Thread
 {
@@ -24,37 +23,44 @@ public class LoginHandler extends Thread
 		try
 		{
 			// Open needed streams for client-server communication
-			BufferedReader reader = new BufferedReader(new InputStreamReader(client.getInputStream()));
-			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(client.getOutputStream()));
+			ObjectOutputStream objOut = new ObjectOutputStream(client.getOutputStream());
+			ObjectInputStream objIn = new ObjectInputStream(client.getInputStream());
 			
 			// Send the "ACK" flag to make clear that we got the client's connection
-			writer.write("ACK\n");
-			writer.flush();
+			MessageWrapper ackFlag = new MessageWrapper(this.parent.getBasicEncryption().encrypt("ACK"));
+			objOut.writeObject(ackFlag);
+			objOut.flush();
+			ackFlag = null;
 			
 			// (Hopefully) Read the login command and split it to handle it properly
-			String loginCommand = reader.readLine();
-			String[] commandSplit = loginCommand.split(" ");
+			MessageWrapper loginCommand = (MessageWrapper) objIn.readObject();
+			String[] commandSplit = this.parent.getBasicEncryption().decrypt(loginCommand.getEncryptedMessage()).split(" ");
+			loginCommand = null;
 			
 			// Check the validity of the login command
 			if (commandSplit.length != 3)
 			{
 				// If not valid, send an error code to the client
-				writer.write("err_login_args");
-				writer.newLine();
-				writer.flush();
+				MessageWrapper errorCode = new MessageWrapper(this.parent.getBasicEncryption().encrypt("err_login_args"));
+				objOut.writeObject(errorCode);
+				objOut.flush();
+				errorCode = null;
 			}
 			
 			String user = commandSplit[1];
 			String password = commandSplit[2];
 			
 			// Create a new client handler for the client
-			ClientHandler handler = new ClientHandler(client, parent);
+			ClientHandler handler = new ClientHandler(client, parent, objIn, objOut);
 			
 			// Log the client in and register him
-			writer.write(parent.doLogin(client, user, password, handler) + "\n");
-			writer.flush();
+			String loginResponse = parent.doLogin(client, user, password, handler);
+			MessageWrapper loginProc = new MessageWrapper(this.parent.getBasicEncryption().encrypt(loginResponse));
+			objOut.writeObject(loginProc);
+			
+			objOut.flush();
 		}
-		catch (IOException ex)
+		catch (Exception ex)
 		{
 			ex.printStackTrace();
 		}

@@ -1,9 +1,8 @@
 package de.mrpixeldream.dreamcode.im.server;
 
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.util.Scanner;
 
 import de.mrpixeldream.dreamcode.im.server.io.EncryptionUtility;
 
@@ -11,24 +10,24 @@ public class ClientHandler extends Thread {
 
 	Socket client;
     String id;
-    Scanner input;
-    PrintWriter output;
+    ObjectInputStream input;
+    ObjectOutputStream output;
     
     EncryptionUtility encryptionUtil;
     
     IMServer parent;
     
-    public ClientHandler(Socket client, IMServer parent)
+    public ClientHandler(Socket client, IMServer parent, ObjectInputStream in, ObjectOutputStream out)
     {
     	this.client = client;
     	this.parent = parent;
     	
     	try
         {
-                this.input = new Scanner(client.getInputStream());
-                this.output = new PrintWriter(client.getOutputStream());
+                this.input = in;
+                this.output = out;
         }
-        catch (IOException e)
+        catch (Exception e)
         {
                 e.printStackTrace();
         }
@@ -50,9 +49,9 @@ public class ClientHandler extends Thread {
     		
     		try
             {
-                //msg = encryptionUtil.receiveEncrypted(client); 
+                msg = encryptionUtil.receiveEncrypted(input); 
                 //System.out.println(msg);
-    			msg = input.nextLine();
+    			//msg = input.nextLine();
                 this.parent.getCommandHandler().handleCommand(msg, client, this);
             }
             catch (Exception e)
@@ -74,6 +73,16 @@ public class ClientHandler extends Thread {
     public String getID()
     {
     	return this.id;
+    }
+    
+    public ObjectOutputStream getOutput()
+    {
+    	return this.output;
+    }
+    
+    public ObjectInputStream getInput()
+    {
+    	return this.input;
     }
     
     public EncryptionUtility getEncryptionUtility()

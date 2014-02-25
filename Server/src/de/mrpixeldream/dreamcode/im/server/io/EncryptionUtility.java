@@ -1,58 +1,58 @@
 package de.mrpixeldream.dreamcode.im.server.io;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.Socket;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
-import de.mrpixeldream.dreamcode.im.server.thirdparty.ReadWriteAES;
-import de.mrpixeldream.dreamcode.im.server.thirdparty.ReadWriteDES;
+import org.jasypt.util.text.StrongTextEncryptor;
 
 public class EncryptionUtility {
 
 	String password = "";
+	StrongTextEncryptor encryptor;
 	
 	public EncryptionUtility(String masterPassword) {
 		
 		this.password = masterPassword;
+		this.encryptor = new StrongTextEncryptor();
+		this.encryptor.setPassword(password);
 		
 	}
 	
-	public void sendEncrypted(String message, Socket target) {
+	public void sendEncrypted(String message, ObjectOutputStream out) {
+		
+		String encryptedMessage = encryptor.encrypt(message);
 		
 		try
 		{
-			ReadWriteAES.encode(message.getBytes(), target.getOutputStream(), password);
+			MessageWrapper messageWrapper = new MessageWrapper(encryptedMessage);
+			out.writeObject(messageWrapper);
+			out.flush();
 		}
-		catch (IOException e)
+		catch (Exception ex)
 		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		catch (Exception e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println("Unkown error in EncryptionUtility (encrypt): ");
+			ex.printStackTrace();
 		}
 		
 	}
 	
-	public String receiveEncrypted(Socket target) throws Exception {
+	public String receiveEncrypted(ObjectInputStream in) throws Exception {
 		
-		String decryptedMessage = "";
-
-		BufferedReader reader = new BufferedReader(new InputStreamReader(target.getInputStream()));
-		String encryptedMessage = reader.readLine();
-		ByteArrayInputStream encryptedBytes = new ByteArrayInputStream(encryptedMessage.getBytes());
-		byte[] encryptionBuffer = ReadWriteAES.decode(encryptedBytes, password);
+		try
+		{
+			MessageWrapper message = (MessageWrapper) in.readObject();
+			
+			String decryptedMessage = encryptor.decrypt(message.getEncryptedMessage());
+			
+			return decryptedMessage;
+		}
+		catch (Exception ex)
+		{
+			System.out.println("Unknown error in EncryptionUtility (decrypt): ");
+			ex.printStackTrace();
+		}
 		
-		System.out.println(encryptionBuffer);
-		decryptedMessage = new String(encryptionBuffer);
-		System.out.println("msg_de: " + decryptedMessage);
-		System.out.println("msg_en: " + encryptedMessage);
-		
-		return decryptedMessage;
+		return null;
 	}
 	
 }

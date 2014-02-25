@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 
+import org.jasypt.util.text.StrongTextEncryptor;
+
 import de.mrpixeldream.dreamcode.im.server.commands.AdminCommandShutdown;
 import de.mrpixeldream.dreamcode.im.server.commands.CommandBroadcast;
 import de.mrpixeldream.dreamcode.im.server.commands.CommandHandler;
@@ -49,6 +51,8 @@ public class IMServer
 	ArrayList<ServerPlugin>			plugins;
 
 	PluginManager					pluginManager;
+	
+	StrongTextEncryptor				basicEncryption	= new StrongTextEncryptor();
 
 	Random							idGenerator;
 
@@ -115,6 +119,9 @@ public class IMServer
 			pluginManager = new PluginManager(this);
 			clientHandlers = new HashMap<>();
 			cmdHandler = new CommandHandler(this);
+			
+			log("Initializing default encryption...", LogLevel.INFO);
+			basicEncryption.setPassword("Gummiball");
 
 			log("Creating socket...", LogLevel.INFO);
 			try
@@ -297,6 +304,11 @@ public class IMServer
 	{
 		return names.get(id);
 	}
+	
+	public StrongTextEncryptor getBasicEncryption()
+	{
+		return this.basicEncryption;
+	}
 
 	public String idByName(String name)
 	{
@@ -313,16 +325,14 @@ public class IMServer
 	public void sendMessage(String id, String message)
 	{
 		ClientHandler handler = clientHandlers.get(id);
-		handler.output.println(message);
-		handler.output.flush();
+		handler.getEncryptionUtility().sendEncrypted(message, handler.output);
 	}
 
 	public void broadcastMessage(String message)
 	{
 		for (ClientHandler handler : clientHandlers.values())
 		{
-			handler.output.println(message);
-			handler.output.flush();
+			handler.getEncryptionUtility().sendEncrypted(message, handler.output);
 		}
 	}
 

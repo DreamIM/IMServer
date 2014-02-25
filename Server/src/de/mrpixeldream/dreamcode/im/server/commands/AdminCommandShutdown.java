@@ -22,7 +22,7 @@ public class AdminCommandShutdown implements Command {
 			}
 			else
 			{
-				clientHandler.getEncryptionUtility().sendEncrypted("You are not an administrator!", sender);
+				clientHandler.getEncryptionUtility().sendEncrypted("You are not an administrator!", clientHandler.getOutput());
 			}
 			
 			return true;
